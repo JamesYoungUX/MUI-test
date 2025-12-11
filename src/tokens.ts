@@ -1,5 +1,5 @@
 /* Design Tokens - Auto-generated from GitHub repository */
-/* Last updated: 2025-12-11T16:33:02.133Z */
+/* Last updated: 2025-12-11T17:09:33.066Z */
 /* Source: https://github.com/jamesyoung-tech/tokens-test */
 
 export interface DesignTokens {
@@ -8,7 +8,7 @@ export interface DesignTokens {
 }
 
 export const tokens: DesignTokens = {
-  'ds-color-button-test': 'hsl(242, 78%, 63%)',
+  'ds-color-button-test': 'hsl(24, 100%, 50%)',
   'button-test-radius': '4px',
 };
 
