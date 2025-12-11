@@ -1,0 +1,36 @@
+/* Design Tokens - Auto-generated from GitHub repository */
+/* This file will be updated when tokens are pulled from the repository */
+
+:root {
+    /* Primary Colors */
+    --ds-color-primary: hsl(207, 90%, 54%);
+    --ds-color-primary-hover: hsl(207, 90%, 61%);
+    --ds-color-primary-active: hsl(207, 90%, 45%);
+
+    /* Button Colors */
+    --ds-color-button-test: hsl(207, 90%, 54%);
+
+    /* Spacing */
+    --ds-spacing-xs: 4px;
+    --ds-spacing-sm: 8px;
+    --ds-spacing-md: 16px;
+    --ds-spacing-lg: 24px;
+    --ds-spacing-xl: 32px;
+
+    /* Typography */
+    --ds-font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --ds-font-size-sm: 14px;
+    --ds-font-size-md: 16px;
+    --ds-font-size-lg: 18px;
+    --ds-font-size-xl: 24px;
+
+    /* Border Radius */
+    --ds-border-radius-sm: 4px;
+    --ds-border-radius-md: 8px;
+    --ds-border-radius-lg: 12px;
+
+    /* Shadows */
+    --ds-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --ds-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+    --ds-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
