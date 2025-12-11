@@ -6,56 +6,69 @@
  * and generates a CSS file with CSS custom properties
  */
 
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Configuration
-const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/jamesyoung-tech/tokens-test/main/design-tokens.json';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Configuration - Try multiple possible paths
+const POSSIBLE_PATHS = [
+    'https://raw.githubusercontent.com/jamesyoung-tech/tokens-test/main/design-tokens.json',
+    'https://raw.githubusercontent.com/jamesyoung-tech/tokens-test/main/tokens/design-tokens.json',
+    'https://raw.githubusercontent.com/jamesyoung-tech/tokens-test/master/design-tokens.json',
+    'https://raw.githubusercontent.com/jamesyoung-tech/tokens-test/master/tokens/design-tokens.json',
+];
+
 const OUTPUT_FILE = path.join(__dirname, '../src/tokens.css');
 
-// Add cache busting to ensure we get the latest version
-const url = `${GITHUB_RAW_URL}?t=${Date.now()}`;
-
-console.log('🚀 Fetching design tokens from GitHub...');
-console.log(`📍 URL: ${GITHUB_RAW_URL}`);
-
-https.get(url, (res) => {
-    let data = '';
-
-    res.on('data', (chunk) => {
-        data += chunk;
-    });
-
-    res.on('end', () => {
-        if (res.statusCode !== 200) {
-            console.error(`❌ Failed to fetch tokens: HTTP ${res.statusCode}`);
-            console.error('Response:', data);
-            process.exit(1);
-        }
-
+// Try fetching from each path
+async function fetchTokens() {
+    for (const url of POSSIBLE_PATHS) {
+        console.log(`🔍 Trying: ${url}`);
         try {
-            const tokens = JSON.parse(data);
-            console.log('✅ Successfully fetched tokens');
-
-            // Generate CSS
-            const css = generateCSS(tokens);
-
-            // Write to file
-            fs.writeFileSync(OUTPUT_FILE, css, 'utf8');
-            console.log(`✅ Tokens written to ${OUTPUT_FILE}`);
-            console.log('🎉 Design tokens updated successfully!');
-
+            const tokens = await fetchFromUrl(url);
+            console.log(`✅ Found tokens at: ${url}`);
+            return tokens;
         } catch (error) {
-            console.error('❌ Error processing tokens:', error.message);
-            process.exit(1);
+            console.log(`   ❌ Not found at this path`);
         }
-    });
+    }
+    throw new Error('Could not find design-tokens.json at any of the expected paths');
+}
 
-}).on('error', (error) => {
-    console.error('❌ Network error:', error.message);
-    process.exit(1);
-});
+function fetchFromUrl(url) {
+    return new Promise((resolve, reject) => {
+        const urlWithCache = `${url}?t=${Date.now()}`;
+
+        https.get(urlWithCache, (res) => {
+            let data = '';
+
+            res.on('data', (chunk) => {
+                data += chunk;
+            });
+
+            res.on('end', () => {
+                if (res.statusCode !== 200) {
+                    reject(new Error(`HTTP ${res.statusCode}`));
+                    return;
+                }
+
+                try {
+                    const tokens = JSON.parse(data);
+                    resolve(tokens);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+
+        }).on('error', (error) => {
+            reject(error);
+        });
+    });
+}
 
 /**
  * Generate CSS from design tokens
@@ -68,8 +81,23 @@ function generateCSS(tokens) {
     css += `/* Source: https://github.com/jamesyoung-tech/tokens-test */\n\n`;
     css += `:root {\n`;
 
-    // Process each token
-    for (const [key, value] of Object.entries(tokens)) {
+    // Flatten and process tokens
+    const flatTokens = {};
+
+    for (const [category, value] of Object.entries(tokens)) {
+        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+            // If it's an object, extract its properties
+            for (const [key, val] of Object.entries(value)) {
+                flatTokens[key] = val;
+            }
+        } else {
+            // If it's a primitive value, use it directly
+            flatTokens[category] = value;
+        }
+    }
+
+    // Process each flattened token
+    for (const [key, value] of Object.entries(flatTokens)) {
         // Convert camelCase or other formats to kebab-case for CSS variables
         const cssVarName = `--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
 
@@ -94,3 +122,29 @@ function generateCSS(tokens) {
 
     return css;
 }
+
+// Main execution
+console.log('🚀 Fetching design tokens from GitHub...\n');
+
+fetchTokens()
+    .then(tokens => {
+        console.log('\n✅ Successfully fetched tokens');
+        console.log(`📦 Found ${Object.keys(tokens).length} token(s)\n`);
+
+        // Generate CSS
+        const css = generateCSS(tokens);
+
+        // Write to file
+        fs.writeFileSync(OUTPUT_FILE, css, 'utf8');
+        console.log(`✅ Tokens written to ${OUTPUT_FILE}`);
+        console.log('🎉 Design tokens updated successfully!');
+    })
+    .catch(error => {
+        console.error('\n❌ Error:', error.message);
+        console.error('\n💡 Please ensure:');
+        console.error('   1. The tokens-test repository exists and is public');
+        console.error('   2. The design-tokens.json file exists in the repository');
+        console.error('   3. You have internet connectivity');
+        console.error('\n📝 You can manually update src/tokens.css with your design tokens');
+        process.exit(1);
+    });
