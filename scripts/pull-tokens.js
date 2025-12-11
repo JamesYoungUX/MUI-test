@@ -22,7 +22,8 @@ const POSSIBLE_PATHS = [
     'https://raw.githubusercontent.com/jamesyoung-tech/tokens-test/master/tokens/design-tokens.json',
 ];
 
-const OUTPUT_FILE = path.join(__dirname, '../src/tokens.css');
+const OUTPUT_CSS_FILE = path.join(__dirname, '../src/tokens.css');
+const OUTPUT_TS_FILE = path.join(__dirname, '../src/tokens.ts');
 
 // Try fetching from each path
 async function fetchTokens() {
@@ -123,6 +124,34 @@ function generateCSS(tokens) {
     return css;
 }
 
+/**
+ * Generate TypeScript module from design tokens
+ */
+function generateTypeScript(flatTokens) {
+    const timestamp = new Date().toISOString();
+
+    let ts = `/* Design Tokens - Auto-generated from GitHub repository */\n`;
+    ts += `/* Last updated: ${timestamp} */\n`;
+    ts += `/* Source: https://github.com/jamesyoung-tech/tokens-test */\n\n`;
+
+    ts += `export interface DesignTokens {\n`;
+    for (const key of Object.keys(flatTokens)) {
+        ts += `  '${key}': string;\n`;
+    }
+    ts += `}\n\n`;
+
+    ts += `export const tokens: DesignTokens = {\n`;
+    for (const [key, value] of Object.entries(flatTokens)) {
+        const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+        ts += `  '${key}': '${stringValue}',\n`;
+    }
+    ts += `};\n\n`;
+
+    ts += `export default tokens;\n`;
+
+    return ts;
+}
+
 // Main execution
 console.log('🚀 Fetching design tokens from GitHub...\n');
 
@@ -131,12 +160,28 @@ fetchTokens()
         console.log('\n✅ Successfully fetched tokens');
         console.log(`📦 Found ${Object.keys(tokens).length} token(s)\n`);
 
+        // Flatten tokens for easier access
+        const flatTokens = {};
+        for (const [category, value] of Object.entries(tokens)) {
+            if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                for (const [key, val] of Object.entries(value)) {
+                    flatTokens[key] = val;
+                }
+            } else {
+                flatTokens[category] = value;
+            }
+        }
+
         // Generate CSS
         const css = generateCSS(tokens);
+        fs.writeFileSync(OUTPUT_CSS_FILE, css, 'utf8');
+        console.log(`✅ CSS tokens written to ${OUTPUT_CSS_FILE}`);
 
-        // Write to file
-        fs.writeFileSync(OUTPUT_FILE, css, 'utf8');
-        console.log(`✅ Tokens written to ${OUTPUT_FILE}`);
+        // Generate TypeScript
+        const ts = generateTypeScript(flatTokens);
+        fs.writeFileSync(OUTPUT_TS_FILE, ts, 'utf8');
+        console.log(`✅ TypeScript tokens written to ${OUTPUT_TS_FILE}`);
+
         console.log('🎉 Design tokens updated successfully!');
     })
     .catch(error => {

@@ -10,20 +10,19 @@ import {
     CssBaseline
 } from '@mui/material';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import tokens from './tokens';
 import './App.css';
 
-// Create a custom theme that will use our design tokens
+// Create a custom theme that uses our design tokens
 const theme = createTheme({
     palette: {
         mode: 'light',
         primary: {
-            main: getComputedStyle(document.documentElement)
-                .getPropertyValue('--ds-color-primary')
-                .trim() || '#1976d2',
+            main: tokens['ds-color-button-test'] || '#1976d2',
         },
     },
     typography: {
-        fontFamily: 'var(--ds-font-family)',
+        fontFamily: 'Inter, Roboto, -apple-system, BlinkMacSystemFont, sans-serif',
     },
 });
 
@@ -52,7 +51,7 @@ function App() {
                         elevation={24}
                         sx={{
                             p: 6,
-                            borderRadius: 'var(--ds-border-radius-lg, 12px)',
+                            borderRadius: '12px',
                             background: 'rgba(255, 255, 255, 0.95)',
                             backdropFilter: 'blur(10px)',
                             textAlign: 'center',
@@ -77,7 +76,7 @@ function App() {
                             <RocketLaunchIcon
                                 sx={{
                                     fontSize: 80,
-                                    color: 'var(--ds-color-primary, #1976d2)',
+                                    color: tokens['ds-color-button-test'],
                                     filter: 'drop-shadow(0 4px 8px rgba(25, 118, 210, 0.3))',
                                 }}
                             />
@@ -122,12 +121,12 @@ function App() {
                                     py: 1.5,
                                     fontSize: '1.1rem',
                                     fontWeight: 600,
-                                    borderRadius: 'var(--ds-border-radius-md, 8px)',
+                                    borderRadius: tokens['button-test-radius'] || '8px',
                                     textTransform: 'none',
-                                    boxShadow: 'var(--ds-shadow-lg, 0 8px 16px rgba(0, 0, 0, 0.2))',
+                                    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
                                     background: clicked
                                         ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                                        : 'var(--ds-color-button-test, var(--ds-color-primary, #1976d2))',
+                                        : tokens['ds-color-button-test'],
                                     transition: 'all 0.3s ease',
                                     '&:hover': {
                                         transform: 'translateY(-2px)',
@@ -186,7 +185,7 @@ function App() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     style={{
-                                        color: 'var(--ds-color-primary, #1976d2)',
+                                        color: tokens['ds-color-button-test'],
                                         textDecoration: 'none',
                                         fontWeight: 500,
                                     }}
