@@ -127,6 +127,7 @@ function App() {
                                     background: clicked
                                         ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                                         : tokens['ds-color-components-button-primary'],
+                                    color: tokens['ds-color-button-text'] || '#ffffff',
                                     transition: 'all 0.3s ease',
                                     '&:hover': {
                                         transform: 'translateY(-2px)',
