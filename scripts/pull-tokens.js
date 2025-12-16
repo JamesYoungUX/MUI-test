@@ -152,13 +152,46 @@ function generateTypeScript(flatTokens) {
     return ts;
 }
 
+/**
+ * Filter tokens based on patterns
+ * Only include tokens that match the specified prefixes or patterns
+ */
+function filterTokens(flatTokens, patterns = []) {
+    // If no patterns specified, return all tokens
+    if (patterns.length === 0) {
+        return flatTokens;
+    }
+
+    const filtered = {};
+    for (const [key, value] of Object.entries(flatTokens)) {
+        // Check if token key matches any pattern
+        const matches = patterns.some(pattern => {
+            if (pattern.endsWith('*')) {
+                // Wildcard pattern
+                return key.startsWith(pattern.slice(0, -1));
+            }
+            return key === pattern || key.startsWith(pattern + '-');
+        });
+
+        if (matches) {
+            filtered[key] = value;
+        }
+    }
+    return filtered;
+}
+
+// Configuration: Define which token patterns to include
+// Examples: ['button*', 'color*', 'spacing*']
+// Leave empty [] to include all tokens
+const TOKEN_PATTERNS = []; // Change this to filter specific tokens
+
 // Main execution
 console.log('🚀 Fetching design tokens from GitHub...\n');
 
 fetchTokens()
     .then(tokens => {
         console.log('\n✅ Successfully fetched tokens');
-        console.log(`📦 Found ${Object.keys(tokens).length} token(s)\n`);
+        console.log(`📦 Found ${Object.keys(tokens).length} token category(ies)\n`);
 
         // Flatten tokens for easier access
         const flatTokens = {};
@@ -172,13 +205,22 @@ fetchTokens()
             }
         }
 
+        console.log(`📋 Total flattened tokens: ${Object.keys(flatTokens).length}`);
+
+        // Filter tokens if patterns are specified
+        const filteredTokens = filterTokens(flatTokens, TOKEN_PATTERNS);
+
+        if (TOKEN_PATTERNS.length > 0) {
+            console.log(`🔍 Filtered to ${Object.keys(filteredTokens).length} token(s) matching patterns: ${TOKEN_PATTERNS.join(', ')}`);
+        }
+
         // Generate CSS
         const css = generateCSS(tokens);
         fs.writeFileSync(OUTPUT_CSS_FILE, css, 'utf8');
         console.log(`✅ CSS tokens written to ${OUTPUT_CSS_FILE}`);
 
-        // Generate TypeScript
-        const ts = generateTypeScript(flatTokens);
+        // Generate TypeScript (using filtered tokens)
+        const ts = generateTypeScript(filteredTokens);
         fs.writeFileSync(OUTPUT_TS_FILE, ts, 'utf8');
         console.log(`✅ TypeScript tokens written to ${OUTPUT_TS_FILE}`);
 

@@ -18,7 +18,7 @@ const theme = createTheme({
     palette: {
         mode: 'light',
         primary: {
-            main: tokens['ds-color-button-test'] || '#1976d2',
+            main: tokens['ds-color-components-button-primary'] || '#1976d2',
         },
     },
     typography: {
@@ -76,7 +76,7 @@ function App() {
                             <RocketLaunchIcon
                                 sx={{
                                     fontSize: 80,
-                                    color: tokens['ds-color-button-test'],
+                                    color: tokens['ds-color-components-button-primary'],
                                     filter: 'drop-shadow(0 4px 8px rgba(25, 118, 210, 0.3))',
                                 }}
                             />
@@ -121,12 +121,12 @@ function App() {
                                     py: 1.5,
                                     fontSize: '1.1rem',
                                     fontWeight: 600,
-                                    borderRadius: tokens['button-test-radius'] || '8px',
+                                    borderRadius: tokens['components-button-primary-radius'] || '8px',
                                     textTransform: 'none',
                                     boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
                                     background: clicked
                                         ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                                        : tokens['ds-color-button-test'],
+                                        : tokens['ds-color-components-button-primary'],
                                     transition: 'all 0.3s ease',
                                     '&:hover': {
                                         transform: 'translateY(-2px)',
@@ -185,7 +185,7 @@ function App() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     style={{
-                                        color: tokens['ds-color-button-test'],
+                                        color: tokens['ds-color-components-button-primary'],
                                         textDecoration: 'none',
                                         fontWeight: 500,
                                     }}
