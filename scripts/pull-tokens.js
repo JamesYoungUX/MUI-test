@@ -14,12 +14,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Configuration - Try multiple possible paths
+// Configuration - Use GitHub API for better cache control
 const POSSIBLE_PATHS = [
-    'https://raw.githubusercontent.com/jamesyoung-tech/tokens-test/main/design-tokens.json',
-    'https://raw.githubusercontent.com/jamesyoung-tech/tokens-test/main/tokens/design-tokens.json',
-    'https://raw.githubusercontent.com/jamesyoung-tech/tokens-test/master/design-tokens.json',
-    'https://raw.githubusercontent.com/jamesyoung-tech/tokens-test/master/tokens/design-tokens.json',
+    'https://api.github.com/repos/jamesyoung-tech/tokens-test/contents/design-tokens.json',
+    'https://api.github.com/repos/jamesyoung-tech/tokens-test/contents/tokens/design-tokens.json',
 ];
 
 const OUTPUT_CSS_FILE = path.join(__dirname, '../src/tokens.css');
@@ -42,9 +40,18 @@ async function fetchTokens() {
 
 function fetchFromUrl(url) {
     return new Promise((resolve, reject) => {
+        // Add timestamp for cache busting
         const urlWithCache = `${url}?t=${Date.now()}`;
 
-        https.get(urlWithCache, (res) => {
+        const options = {
+            headers: {
+                'User-Agent': 'MUI-Token-Puller',
+                'Accept': 'application/vnd.github.v3+json',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+            }
+        };
+
+        https.get(urlWithCache, options, (res) => {
             let data = '';
 
             res.on('data', (chunk) => {
@@ -58,8 +65,17 @@ function fetchFromUrl(url) {
                 }
 
                 try {
-                    const tokens = JSON.parse(data);
-                    resolve(tokens);
+                    const response = JSON.parse(data);
+
+                    // GitHub API returns base64 encoded content
+                    if (response.content && response.encoding === 'base64') {
+                        const decoded = Buffer.from(response.content, 'base64').toString('utf-8');
+                        const tokens = JSON.parse(decoded);
+                        resolve(tokens);
+                    } else {
+                        // Fallback for raw URLs (shouldn't happen with new URLs)
+                        resolve(response);
+                    }
                 } catch (error) {
                     reject(error);
                 }
