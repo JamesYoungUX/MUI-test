@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "pull-tokens": "node scripts/pull-tokens.js",
+    "predev": "npm run pull-tokens",
     "prebuild": "npm run pull-tokens"
   },
   "devDependencies": {
